@@ -5,8 +5,8 @@ module SimpleCalendar
       opts = {
           :year       => (params[:year] || Time.zone.now.year).to_i,
           :month      => (params[:month] || Time.zone.now.month).to_i,
-          :prev_text  => raw("&laquo;"),
-          :next_text  => raw("&raquo;")
+          :prev_text  => raw("&laquo;&nbsp;"),
+          :next_text  => raw("&nbsp;&raquo;")
       }
       options.reverse_merge! opts
       selected_month = Date.civil(options[:year], options[:month])
@@ -95,22 +95,29 @@ module SimpleCalendar
 
     # Generates the header that includes the month and next and previous months
     def month_header(selected_month, options)
-      content_tag :h2 do
+      content_tag(:h2, :class => "calendar") do
         previous_month = selected_month.advance :months => -1
         next_month = selected_month.advance :months => 1
         tags = []
 
-        tags << month_link(options[:prev_text], previous_month, {:class => "previous-month"})
+        prevtext = options[:prev_text]
+        nexttext = options[:next_text]
+        options.delete(:prev_text)
+        options.delete(:next_text)
+
+        tags << month_link(prevtext, previous_month, options, {:class => "previous-month"})
         tags << "#{I18n.t("date.month_names")[selected_month.month]} #{selected_month.year}"
-        tags << month_link(options[:next_text], next_month, {:class => "next-month"})
+        tags << month_link(nexttext, next_month, options, {:class => "next-month"})
 
         tags.join.html_safe
       end
     end
 
     # Generates the link to next and previous months
-    def month_link(text, month, opts={})
-      link_to(text, "#{simple_calendar_path}?month=#{month.month}&year=#{month.year}", opts)
+    def month_link(text, month, options={}, opts={})
+	  options[:month] = month.month
+	  options[:year] = month.year
+      link_to(text, "#{simple_calendar_path}?#{options.to_param}", opts)
     end
 
     # Returns the full path to the calendar
