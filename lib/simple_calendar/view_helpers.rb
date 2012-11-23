@@ -72,7 +72,7 @@ module SimpleCalendar
                   content_tag(:div) do
                     divs = []
 
-                    concat content_tag(:div, date.day.to_s, :class=>"day_number")
+                    concat content_tag(:div, day_header_link(date.day.to_s, date, options), :class=>"day_number")
                     divs << day_events(date, events).collect {|event| block.call(event) }
                     divs.join.html_safe
                   end #content_tag :div
@@ -113,6 +113,12 @@ module SimpleCalendar
       end
     end
 
+    # Generates the link in each day if the date belongs
+    def day_header_link(text, day, options={}, opts={})
+        options[:currentdate] = day
+        link_to(text, "#{simple_calendar_path}?#{options.to_param}", opts)
+    end
+    
     # Generates the link to next and previous months
     def month_link(text, month, options={}, opts={})
 	  options[:month] = month.month
